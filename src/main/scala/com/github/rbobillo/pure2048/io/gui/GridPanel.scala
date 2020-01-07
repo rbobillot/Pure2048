@@ -93,7 +93,7 @@ class GridPanel(initialGrid: Grid, frame: JFrame) extends JPanel with KeyListene
   private def gridChanged(oldGrid: Grid, newGrid: Grid): Boolean =
     oldGrid.tiles.indexed.map(_._1)
       .zip(newGrid.tiles.indexed.map(_._1))
-      .exists(x => x._1 != x._2) && !newGrid.isGameOver
+      .exists(x => x._1 != x._2) && !newGrid.isGameLost
 
   private def showGameOver(g: Graphics2D): IO[Unit] =
     for {
@@ -112,7 +112,7 @@ class GridPanel(initialGrid: Grid, frame: JFrame) extends JPanel with KeyListene
       g <- IO.apply(graphics.asInstanceOf[Graphics2D])
       m <- IO.pure(grid merge direction)
       _ <- if (gridChanged(m._1, m._2)) reloadGridAndAddTile(g)(m._2) else IO.unit
-      _ <- if (m._2.isGameOver) showGameOver(g) else IO.unit
+      _ <- if (m._2.isGameLost) showGameOver(g) else IO.unit
     } yield ()
 
   override def keyPressed(e: KeyEvent): Unit =

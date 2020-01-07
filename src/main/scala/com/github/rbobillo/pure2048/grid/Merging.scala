@@ -17,8 +17,8 @@ object Merging extends Enumeration {
       }
   }
 
-  private val mergeRowRight: Row => Row =
-    _.filterNot(_ == 0).reverse.padTo(4, 0).reverse match {
+  private def mergeRowRight(row: Row): Row =
+    row.filterNot(_ == 0).reverse.padTo(4, 0).reverse match {
       case Array(a, b, c, d) if a == b && c == d => Array(0, 0, a + b, c + d)
       case Array(a, b, c, d) if c == d           => Array(0, a, b, c + d)
       case Array(a, b, c, d) if b == c           => Array(0, a, b + c, d)

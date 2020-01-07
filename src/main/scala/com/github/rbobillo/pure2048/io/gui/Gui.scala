@@ -8,10 +8,10 @@ import javax.swing.JFrame
 
 object Gui {
 
-  private def createFrameAndPanel(grid: Grid): IO[(JFrame, GridPanel)] =
+  private def createFrameAndPanel(grid: Grid, width: Int, height: Int): IO[(JFrame, GridPanel)] =
     for {
       f <- IO.pure(new JFrame)
-      d <- IO.pure(new Dimension(540, 540))
+      d <- IO.pure(new Dimension(width, height))
       p <- IO.pure(new GridPanel(grid, f))
       _ <- IO.apply(p.setPreferredSize(d))
     } yield f -> p
@@ -25,10 +25,10 @@ object Gui {
       _ <- IO.apply(frame.addKeyListener(panel))
     } yield frame
 
-  def initGUI(grid: Grid): IO[JFrame] =
+  def initGUI(grid: Grid, width: Int, height: Int): IO[(JFrame, GridPanel)] =
     for {
-      fp <- createFrameAndPanel(grid)
-      fm <- initFrame(frame = fp._1, panel = fp._2)
-    } yield fm
+      fp <- createFrameAndPanel(grid, width, height)
+      _ <- initFrame(frame = fp._1, panel = fp._2)
+    } yield fp
 
 }

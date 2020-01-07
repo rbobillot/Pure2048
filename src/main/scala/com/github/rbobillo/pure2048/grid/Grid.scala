@@ -8,20 +8,22 @@ case class Grid(tiles: Tiles,
                 score: Int   = 0) {
 
   def addTile(): Grid = {
-    val n = if (Random.nextFloat < 0.10f) 4 else 2
-
-    val fullTiles = tiles.indexed.collect { case (n, j, i) if n != 0 => i -> j }.toSet
+    lazy val newTileValue = if (Random.nextFloat < 0.10f) 4 else 2
+    lazy val fullTiles = tiles.indexed.collect { case (n, j, i) if n != 0 => i -> j }.toSet
 
     val Seq((x, y), _*) =
       Random.shuffle((0 until 4).flatMap(x => (0 until 4).map(_ -> x)).filterNot(fullTiles))
 
-    this.copy(tiles.updated(x, tiles(x).updated(y, n)))
+    this.copy(tiles.updated(x, tiles(x).updated(y, newTileValue)))
   }
 
-  def isGameOver: Boolean =
+  def isGameLost: Boolean =
     Seq(Merging.RIGHT, Merging.DOWN, Merging.LEFT, Merging.UP).foldLeft(tiles) { (ts, d) =>
       mergeFunction(d)(ts)
     }.flatten.toSeq.zip(tiles.flatten.toSeq).forall(x => x._1 == x._2)
+
+  def isGameWon: Boolean =
+    tiles.flatten.contains(2048)
 
   private val mergeFunction: Merging.Value => Tiles => Tiles = {
     case Merging.RIGHT => Merging.mergeRight

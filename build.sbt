@@ -4,7 +4,7 @@ name := "Pure2048"
 
 assemblyJarName in assembly := "2048.jar"
 
-version := "1.0.0"
+version := "0.0.1"
 
 scalaVersion := "2.13.1"
 
@@ -13,10 +13,10 @@ scalacOptions ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.typelevel"         %% "cats-core"   % "2.0.0",
-  "org.typelevel"         %% "cats-effect" % "2.0.0",
+  "org.typelevel" %% "cats-core"   % "2.0.0",
+  "org.typelevel" %% "cats-effect" % "2.0.0",
 
-  "org.scalatest"         %% "scalatest"   % "3.0.8" % "test"
+  "org.scalatest" %% "scalatest"   % "3.0.8" % "test"
 )
 
 //================================================================================
