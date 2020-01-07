@@ -82,8 +82,10 @@ class GridPanel(initialGrid: Grid, frame: JFrame) extends JPanel with KeyListene
     for {
       _ <- IO.apply(removeAll())
       _ <- IO.apply(setBackground(Color decode "#bbada0"))
+      // reload grid
       _ <- IO.apply { grid = newGrid }
       _ <- drawIndexedTiles(g)(grid.tiles.indexed)
+      // sleep and add tile
       _ <- IO.apply { Thread.sleep(30) }
       _ <- IO.apply { grid = newGrid.addTile() }
       _ <- drawIndexedTiles(g)(grid.tiles.indexed)
@@ -93,7 +95,7 @@ class GridPanel(initialGrid: Grid, frame: JFrame) extends JPanel with KeyListene
   private def gridChanged(oldGrid: Grid, newGrid: Grid): Boolean =
     oldGrid.tiles.indexed.map(_._1)
       .zip(newGrid.tiles.indexed.map(_._1))
-      .exists(x => x._1 != x._2) && !newGrid.isGameLost
+      .exists(x => x._1 != x._2) && !newGrid.isGameLost // && !newGrid.isGameWon
 
   private def showGameOver(g: Graphics2D): IO[Unit] =
     for {
@@ -107,12 +109,25 @@ class GridPanel(initialGrid: Grid, frame: JFrame) extends JPanel with KeyListene
       _ <- IO.apply(g.drawString("Game Over", 540 / 2 - 120, 540 / 2))
     } yield ()
 
+  private def showGameWon(g: Graphics2D): IO[Unit] =
+    for {
+      _ <- IO.apply(removeAll())
+      _ <- IO.apply(setBackground(Color decode "#bbada0"))
+      f <- IO.pure(new Font("Helvetica Neue", Font.BOLD, 42))
+      _ <- IO.apply(g.setColor(new Color(187, 173, 160, 30)))
+      _ <- IO.apply(g.fillRect(0, 0, 540, 540))
+      _ <- IO.apply(g.setColor(Color.DARK_GRAY))
+      _ <- IO.apply(g.setFont(f))
+      _ <- IO.apply(g.drawString("Game Won", 540 / 2 - 110, 540 / 2))
+    } yield ()
+
   private def merge(direction: Merging.Value)(graphics: Graphics): IO[Unit] =
     for {
       g <- IO.apply(graphics.asInstanceOf[Graphics2D])
       m <- IO.pure(grid merge direction)
       _ <- if (gridChanged(m._1, m._2)) reloadGridAndAddTile(g)(m._2) else IO.unit
       _ <- if (m._2.isGameLost) showGameOver(g) else IO.unit
+      _ <- if (m._2.isGameWon) showGameWon(g) else IO.unit
     } yield ()
 
   override def keyPressed(e: KeyEvent): Unit =
