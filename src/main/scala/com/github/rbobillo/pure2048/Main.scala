@@ -1,12 +1,21 @@
 package com.github.rbobillo.pure2048
 
-import cats.effect.{ ExitCode, IO, IOApp }
+import akka.actor.{ActorRef, ActorSystem, Props}
+import cats.effect.{ExitCode, IO, IOApp}
+import com.github.rbobillo.pure2048.actors.{GameBoardActor, GridActor}
 import com.github.rbobillo.pure2048.grid.Grid
 import com.github.rbobillo.pure2048.grid.Merging.Tiles
 import com.github.rbobillo.pure2048.io.Output
 import com.github.rbobillo.pure2048.io.gui.Gui
 
 object Main extends IOApp {
+
+  private def initActors: IO[(ActorRef, ActorRef)] =
+    for {
+      sys2048 <- IO.apply(ActorSystem("2048ActorSystem"))
+      grActor <- IO.apply(sys2048.actorOf(Props[GridActor], "GridActor"))
+      gbActor <- IO.apply(sys2048.actorOf(Props[GameBoardActor], "GameBoardActor"))
+    } yield grActor -> gbActor
 
   private def initGrid(initialTiles: Tiles): IO[Grid] =
     for {
