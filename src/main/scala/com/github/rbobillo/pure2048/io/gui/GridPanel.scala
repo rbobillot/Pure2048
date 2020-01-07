@@ -95,9 +95,9 @@ class GridPanel(initialGrid: Grid, frame: JFrame) extends JPanel with KeyListene
   private def gridChanged(oldGrid: Grid, newGrid: Grid): Boolean =
     oldGrid.tiles.indexed.map(_._1)
       .zip(newGrid.tiles.indexed.map(_._1))
-      .exists(x => x._1 != x._2) && !newGrid.isGameLost // && !newGrid.isGameWon
+      .exists(x => x._1 != x._2) && !newGrid.isGameLost
 
-  private def showGameOver(g: Graphics2D): IO[Unit] =
+  private def showGameStopMessage(g: Graphics2D)(msg: String): IO[Unit] =
     for {
       _ <- IO.apply(removeAll())
       _ <- IO.apply(setBackground(Color decode "#bbada0"))
@@ -106,19 +106,7 @@ class GridPanel(initialGrid: Grid, frame: JFrame) extends JPanel with KeyListene
       _ <- IO.apply(g.fillRect(0, 0, 540, 540))
       _ <- IO.apply(g.setColor(Color.DARK_GRAY))
       _ <- IO.apply(g.setFont(f))
-      _ <- IO.apply(g.drawString("Game Over", 540 / 2 - 120, 540 / 2))
-    } yield ()
-
-  private def showGameWon(g: Graphics2D): IO[Unit] =
-    for {
-      _ <- IO.apply(removeAll())
-      _ <- IO.apply(setBackground(Color decode "#bbada0"))
-      f <- IO.pure(new Font("Helvetica Neue", Font.BOLD, 42))
-      _ <- IO.apply(g.setColor(new Color(187, 173, 160, 30)))
-      _ <- IO.apply(g.fillRect(0, 0, 540, 540))
-      _ <- IO.apply(g.setColor(Color.DARK_GRAY))
-      _ <- IO.apply(g.setFont(f))
-      _ <- IO.apply(g.drawString("Game Won", 540 / 2 - 110, 540 / 2))
+      _ <- IO.apply(g.drawString(msg, 540 / 2 - (msg.length + 3) * 10, 540 / 2))
     } yield ()
 
   private def merge(direction: Merging.Value)(graphics: Graphics): IO[Unit] =
@@ -126,8 +114,8 @@ class GridPanel(initialGrid: Grid, frame: JFrame) extends JPanel with KeyListene
       g <- IO.apply(graphics.asInstanceOf[Graphics2D])
       m <- IO.pure(grid merge direction)
       _ <- if (gridChanged(m._1, m._2)) reloadGridAndAddTile(g)(m._2) else IO.unit
-      _ <- if (m._2.isGameLost) showGameOver(g) else IO.unit
-      _ <- if (m._2.isGameWon) showGameWon(g) else IO.unit
+      _ <- if (m._2.isGameLost) showGameStopMessage(g)("Game Over") else IO.unit
+      _ <- if (m._2.isGameWon) showGameStopMessage(g)("Game Won") else IO.unit
     } yield ()
 
   override def keyPressed(e: KeyEvent): Unit =
