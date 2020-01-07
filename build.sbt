@@ -13,10 +13,13 @@ scalacOptions ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-core"   % "2.0.0",
-  "org.typelevel" %% "cats-effect" % "2.0.0",
+  "org.typelevel"     %% "cats-core"   % "2.0.0",
+  "org.typelevel"     %% "cats-effect" % "2.0.0",
 
-  "org.scalatest" %% "scalatest"   % "3.0.8" % "test"
+  "com.typesafe.akka" %% "akka-actor"       % "2.6.1",
+  "com.typesafe.akka" %% "akka-persistence" % "2.6.1",
+
+  "org.scalatest"     %% "scalatest"   % "3.0.8" % "test"
 )
 
 //================================================================================
