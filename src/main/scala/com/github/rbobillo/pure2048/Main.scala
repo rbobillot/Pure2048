@@ -1,21 +1,21 @@
 package com.github.rbobillo.pure2048
 
-import akka.actor.{ActorRef, ActorSystem, Props}
-import cats.effect.{ExitCode, IO, IOApp}
-import com.github.rbobillo.pure2048.actors.{GameBoardActor, GridActor}
+import akka.actor.{ ActorRef, ActorSystem, Props }
+import cats.effect.{ ExitCode, IO, IOApp }
+import com.github.rbobillo.pure2048.actors.{ GameBoardActor, GridActor, GuiActor }
 import com.github.rbobillo.pure2048.grid.Grid
 import com.github.rbobillo.pure2048.grid.Merging.Tiles
-import com.github.rbobillo.pure2048.io.Output
-import com.github.rbobillo.pure2048.io.gui.Gui
+import com.github.rbobillo.pure2048.gui.{ Gui, Output }
 
 object Main extends IOApp {
 
-  private def initActors: IO[(ActorRef, ActorRef)] =
+  private def initGameBoardActor: IO[(ActorRef, ActorRef, ActorRef)] =
     for {
-      sys2048 <- IO.apply(ActorSystem("2048ActorSystem"))
-      grActor <- IO.apply(sys2048.actorOf(Props[GridActor], "GridActor"))
-      gbActor <- IO.apply(sys2048.actorOf(Props[GameBoardActor], "GameBoardActor"))
-    } yield grActor -> gbActor
+      system2048 <- IO.apply(ActorSystem("2048ActorSystem"))
+      boardActor <- IO.apply(system2048.actorOf(Props[GameBoardActor], "GameBoardActor"))
+      grdActor <- IO.apply(system2048.actorOf(Props[GridActor], "GridActor"))
+      guiActor <- IO.apply(system2048.actorOf(Props[GuiActor], "GuiActor"))
+    } yield (boardActor, grdActor, guiActor)
 
   private def initGrid(initialTiles: Tiles): IO[Grid] =
     for {
@@ -27,8 +27,9 @@ object Main extends IOApp {
   def run(args: List[String]): IO[ExitCode] =
     for {
       g <- initGrid(initialTiles = Array.fill(4)(Array.fill(4)(0)))
-      f <- Gui.initGUI(g, 540, 540)
-      _ <- Output.displayGuiGrid(grid  = g, panel = f._2, frame = f._1)
+      a <- initGameBoardActor
+      f <- Gui.initGUI(g, 540, 540, a._3)
+      _ <- Output.displayGuiGrid(grid  = g, frame = f._1, a._3)
     } yield ExitCode.Success
 
 }

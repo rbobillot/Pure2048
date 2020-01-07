@@ -1,6 +1,5 @@
 package com.github.rbobillo.pure2048.dto
 
-sealed trait GameStatus
-
-case object GameWonStatus extends GameStatus
-case object GameLostStatus extends GameStatus
+object GameStatus extends Enumeration {
+  val RUNNING, WON, LOST = Value
+}

@@ -1,18 +1,19 @@
-package com.github.rbobillo.pure2048.io.gui
+package com.github.rbobillo.pure2048.gui
 
 import java.awt.Dimension
 
+import akka.actor.ActorRef
 import cats.effect.IO
 import com.github.rbobillo.pure2048.grid.Grid
 import javax.swing.JFrame
 
 object Gui {
 
-  private def createFrameAndPanel(grid: Grid, width: Int, height: Int): IO[(JFrame, GridPanel)] =
+  private def createFrameAndPanel(grid: Grid, width: Int, height: Int, gameBoardActor: ActorRef): IO[(JFrame, GridPanel)] =
     for {
       f <- IO.pure(new JFrame)
       d <- IO.pure(new Dimension(width, height))
-      p <- IO.pure(new GridPanel(grid, f))
+      p <- IO.pure(new GridPanel(grid, f, gameBoardActor))
       _ <- IO.apply(p.setPreferredSize(d))
     } yield f -> p
 
@@ -25,9 +26,9 @@ object Gui {
       _ <- IO.apply(frame.addKeyListener(panel))
     } yield frame
 
-  def initGUI(grid: Grid, width: Int, height: Int): IO[(JFrame, GridPanel)] =
+  def initGUI(grid: Grid, width: Int, height: Int, gameBoardActor: ActorRef): IO[(JFrame, GridPanel)] =
     for {
-      fp <- createFrameAndPanel(grid, width, height)
+      fp <- createFrameAndPanel(grid, width, height, gameBoardActor)
       _ <- initFrame(frame = fp._1, panel = fp._2)
     } yield fp
 

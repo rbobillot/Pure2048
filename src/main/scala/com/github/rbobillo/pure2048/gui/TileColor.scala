@@ -1,4 +1,4 @@
-package com.github.rbobillo.pure2048.io.gui
+package com.github.rbobillo.pure2048.gui
 
 import java.awt.Color
 

@@ -2,13 +2,18 @@ package com.github.rbobillo.pure2048.actors
 
 import akka.actor.Actor
 import akka.event.Logging
-import com.github.rbobillo.pure2048.dto.MergeGrid
+import cats.effect.IO
+import com.github.rbobillo.pure2048.dto.{ MergeGrid, NewGridState }
 
 class GridActor extends Actor {
   private val log = Logging(context.system, this)
 
+  private def updateGrid(): IO[Unit] = IO.unit
+
   def receive: Receive = {
-    case MergeGrid(d) => log.debug(s"MergeGrid message received: $d")
+    // Grid Handling Messages
+    case MergeGrid(d) => log.info(s"MergeGrid message received: $d")
+    // Other messages
     case m            => log.error(s"Unknown message received: $m")
   }
 

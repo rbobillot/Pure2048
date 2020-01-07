@@ -1,15 +1,17 @@
-package com.github.rbobillo.pure2048.io.gui
+package com.github.rbobillo.pure2048.gui
 
 import java.awt.{ Color, Font, Graphics, Graphics2D }
 import java.awt.event.{ KeyEvent, KeyListener }
 
+import akka.actor.ActorRef
 import cats.effect.IO
+import com.github.rbobillo.pure2048.dto.{ Direction, MergeGrid }
 import com.github.rbobillo.pure2048.grid.Merging.{ IndexedTiles, IndexingTiles }
 import com.github.rbobillo.pure2048.grid.{ Grid, Merging }
-import com.github.rbobillo.pure2048.io.gui
+import com.github.rbobillo.pure2048.gui
 import javax.swing.{ JFrame, JPanel }
 
-class GridPanel(initialGrid: Grid, frame: JFrame) extends JPanel with KeyListener {
+class GridPanel(initialGrid: Grid, frame: JFrame, gameBoardActor: ActorRef) extends JPanel with KeyListener {
 
   private val offset = 540 / 4
 
@@ -120,11 +122,19 @@ class GridPanel(initialGrid: Grid, frame: JFrame) extends JPanel with KeyListene
 
   override def keyPressed(e: KeyEvent): Unit =
     (e.getKeyCode match {
-      case KeyEvent.VK_RIGHT => merge(Merging.RIGHT)(e.getComponent.getGraphics)
-      case KeyEvent.VK_LEFT  => merge(Merging.LEFT)(e.getComponent.getGraphics)
-      case KeyEvent.VK_DOWN  => merge(Merging.DOWN)(e.getComponent.getGraphics)
-      case KeyEvent.VK_UP    => merge(Merging.UP)(e.getComponent.getGraphics)
-      case _                 => IO.unit
+      case KeyEvent.VK_RIGHT =>
+        gameBoardActor ! MergeGrid(Direction.RIGHT)
+        merge(Merging.RIGHT)(e.getComponent.getGraphics)
+      case KeyEvent.VK_LEFT =>
+        gameBoardActor ! MergeGrid(Direction.LEFT)
+        merge(Merging.LEFT)(e.getComponent.getGraphics)
+      case KeyEvent.VK_DOWN =>
+        gameBoardActor ! MergeGrid(Direction.DOWN)
+        merge(Merging.DOWN)(e.getComponent.getGraphics)
+      case KeyEvent.VK_UP =>
+        gameBoardActor ! MergeGrid(Direction.UP)
+        merge(Merging.UP)(e.getComponent.getGraphics)
+      case _ => IO.unit
     }).unsafeRunSync()
 
   override def keyReleased(e: KeyEvent): Unit = ()
