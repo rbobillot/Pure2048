@@ -18,9 +18,9 @@ case class Grid(tiles: Tiles,
   }
 
   def isGameLost: Boolean =
-    Seq(Merging.RIGHT, Merging.DOWN, Merging.LEFT, Merging.UP).foldLeft(tiles) { (ts, d) =>
-      mergeFunction(d)(ts)
-    }.flatten.toSeq.zip(tiles.flatten.toSeq).forall(x => x._1 == x._2)
+    Seq(Merging.RIGHT, Merging.DOWN, Merging.LEFT, Merging.UP).foldLeft(tiles :: Nil) { (tss, d) =>
+      mergeFunction(d)(tss.last) :: tss
+    }.transpose.forall(xs => xs.forall(_ sameElements xs.head))
 
   def isGameWon: Boolean =
     tiles.flatten.contains(2048)
