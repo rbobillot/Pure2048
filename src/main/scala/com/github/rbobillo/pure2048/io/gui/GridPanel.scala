@@ -4,9 +4,9 @@ import java.awt.{ Color, Font, Graphics, Graphics2D }
 import java.awt.event.{ KeyEvent, KeyListener }
 
 import cats.effect.IO
-import com.github.rbobillo.pure2048.grid.Merging.{ IndexedTiles, Tiles }
-import com.github.rbobillo.pure2048.grid.Merging.IndexingTiles
-import com.github.rbobillo.pure2048.grid.{ Grid, Merging, TileColor }
+import com.github.rbobillo.pure2048.grid.Merging.{ IndexedTiles, IndexingTiles }
+import com.github.rbobillo.pure2048.grid.{ Grid, Merging }
+import com.github.rbobillo.pure2048.io.gui
 import javax.swing.{ JFrame, JPanel }
 
 class GridPanel(initialGrid: Grid, frame: JFrame) extends JPanel with KeyListener {
