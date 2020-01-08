@@ -2,7 +2,7 @@ package com.github.rbobillo.pure2048.grid
 
 import Merging.{ IndexedTiles, Tiles }
 import com.github.rbobillo.pure2048.dto.Direction
-
+import com.github.rbobillo.pure2048.Config.config
 import scala.util.Random
 
 case class Grid(tiles: Tiles,
@@ -13,7 +13,10 @@ case class Grid(tiles: Tiles,
     lazy val fullTiles = indexed.collect { case (n, j, i) if n != 0 => i -> j }.toSet
 
     val Seq((x, y), _*) =
-      Random.shuffle((0 until 4).flatMap(x => (0 until 4).map(_ -> x)).filterNot(fullTiles))
+      Random.shuffle(
+        (0 until config.gridHeight)
+          .flatMap(x => (0 until config.gridWidth).map(_ -> x))
+          .filterNot(fullTiles))
 
     this.copy(tiles.updated(x, tiles(x).updated(y, newTileValue)))
   }
