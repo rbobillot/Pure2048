@@ -1,6 +1,7 @@
 package com.github.rbobillo.pure2048.grid
 
-import Merging.{ Tiles, IndexingTiles }
+import Merging.{ IndexedTiles, Tiles }
+import com.github.rbobillo.pure2048.dto.Direction
 
 import scala.util.Random
 
@@ -9,7 +10,7 @@ case class Grid(tiles: Tiles,
 
   def addTile(): Grid = {
     lazy val newTileValue = if (Random.nextFloat < 0.10f) 4 else 2
-    lazy val fullTiles = tiles.indexed.collect { case (n, j, i) if n != 0 => i -> j }.toSet
+    lazy val fullTiles = indexed.collect { case (n, j, i) if n != 0 => i -> j }.toSet
 
     val Seq((x, y), _*) =
       Random.shuffle((0 until 4).flatMap(x => (0 until 4).map(_ -> x)).filterNot(fullTiles))
@@ -18,22 +19,29 @@ case class Grid(tiles: Tiles,
   }
 
   def isGameLost: Boolean =
-    Seq(Merging.RIGHT, Merging.DOWN, Merging.LEFT, Merging.UP).foldLeft(tiles :: Nil) { (tss, d) =>
+    Seq(Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP).foldLeft(tiles :: Nil) { (tss, d) =>
       mergeFunction(d)(tss.last) :: tss
     }.transpose.forall(xs => xs.forall(_ sameElements xs.head))
 
   def isGameWon: Boolean =
     tiles.flatten.contains(2048)
 
-  private val mergeFunction: Merging.Value => Tiles => Tiles = {
-    case Merging.RIGHT => Merging.mergeRight
-    case Merging.LEFT  => Merging.mergeLeft
-    case Merging.DOWN  => Merging.mergeDown
-    case Merging.UP    => Merging.mergeUp
+  def indexed: IndexedTiles =
+    tiles.zipWithIndex.flatMap { case (row, y) =>
+      row.zipWithIndex.map { case (n, x) =>
+        (n, x, y)
+      }
+    }
+
+  private val mergeFunction: Direction.Value => Tiles => Tiles = {
+    case Direction.RIGHT => Merging.mergeRight
+    case Direction.LEFT  => Merging.mergeLeft
+    case Direction.DOWN  => Merging.mergeDown
+    case Direction.UP    => Merging.mergeUp
   }
 
   // returns a tuple: (PreviousGrid, NextGrid)
-  def merge(direction: Merging.Value): (Grid, Grid) = {
+  def merge(direction: Direction.Value): (Grid, Grid) = {
     val newTiles = mergeFunction(direction)(tiles)
     val newScore = newTiles.flatten.toSeq.diff(tiles.flatten.toSeq).sum
 

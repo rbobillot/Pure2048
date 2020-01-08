@@ -6,9 +6,8 @@ import java.awt.event.{ KeyEvent, KeyListener }
 import akka.actor.ActorRef
 import cats.effect.IO
 import com.github.rbobillo.pure2048.dto.{ Direction, MergeGrid }
-import com.github.rbobillo.pure2048.grid.Merging.{ IndexedTiles, IndexingTiles }
-import com.github.rbobillo.pure2048.grid.{ Grid, Merging }
-import com.github.rbobillo.pure2048.gui
+import com.github.rbobillo.pure2048.grid.Merging.IndexedTiles
+import com.github.rbobillo.pure2048.grid.Grid
 import javax.swing.{ JFrame, JPanel }
 
 class GridPanel(initialGrid: Grid, frame: JFrame, gameBoardActor: ActorRef) extends JPanel with KeyListener {
@@ -86,17 +85,17 @@ class GridPanel(initialGrid: Grid, frame: JFrame, gameBoardActor: ActorRef) exte
       _ <- IO.apply(setBackground(Color decode "#bbada0"))
       // reload grid
       _ <- IO.apply { grid = newGrid }
-      _ <- drawIndexedTiles(g)(grid.tiles.indexed)
+      _ <- drawIndexedTiles(g)(grid.indexed)
       // sleep and add tile
       _ <- IO.apply { Thread.sleep(30) }
       _ <- IO.apply { grid = newGrid.addTile() }
-      _ <- drawIndexedTiles(g)(grid.tiles.indexed)
+      _ <- drawIndexedTiles(g)(grid.indexed)
       _ <- IO.apply(frame.setTitle(s"2048 - Score: ${grid.score}"))
     } yield ()
 
   private def gridChanged(oldGrid: Grid, newGrid: Grid): Boolean =
-    oldGrid.tiles.indexed.map(_._1)
-      .zip(newGrid.tiles.indexed.map(_._1))
+    oldGrid.indexed.map(_._1)
+      .zip(newGrid.indexed.map(_._1))
       .exists(x => x._1 != x._2) && !newGrid.isGameLost
 
   private def showGameStopMessage(g: Graphics2D)(msg: String): IO[Unit] =
@@ -111,7 +110,7 @@ class GridPanel(initialGrid: Grid, frame: JFrame, gameBoardActor: ActorRef) exte
       _ <- IO.apply(g.drawString(msg, 540 / 2 - (msg.length + 3) * 10, 540 / 2))
     } yield ()
 
-  private def merge(direction: Merging.Value)(graphics: Graphics): IO[Unit] =
+  private def merge(direction: Direction.Value)(graphics: Graphics): IO[Unit] =
     for {
       g <- IO.apply(graphics.asInstanceOf[Graphics2D])
       m <- IO.pure(grid merge direction)
@@ -124,16 +123,16 @@ class GridPanel(initialGrid: Grid, frame: JFrame, gameBoardActor: ActorRef) exte
     (e.getKeyCode match {
       case KeyEvent.VK_RIGHT =>
         gameBoardActor ! MergeGrid(Direction.RIGHT)
-        merge(Merging.RIGHT)(e.getComponent.getGraphics)
+        merge(Direction.RIGHT)(e.getComponent.getGraphics)
       case KeyEvent.VK_LEFT =>
         gameBoardActor ! MergeGrid(Direction.LEFT)
-        merge(Merging.LEFT)(e.getComponent.getGraphics)
+        merge(Direction.LEFT)(e.getComponent.getGraphics)
       case KeyEvent.VK_DOWN =>
         gameBoardActor ! MergeGrid(Direction.DOWN)
-        merge(Merging.DOWN)(e.getComponent.getGraphics)
+        merge(Direction.DOWN)(e.getComponent.getGraphics)
       case KeyEvent.VK_UP =>
         gameBoardActor ! MergeGrid(Direction.UP)
-        merge(Merging.UP)(e.getComponent.getGraphics)
+        merge(Direction.UP)(e.getComponent.getGraphics)
       case _ => IO.unit
     }).unsafeRunSync()
 
@@ -144,7 +143,7 @@ class GridPanel(initialGrid: Grid, frame: JFrame, gameBoardActor: ActorRef) exte
   override def paint(gs: Graphics): Unit = {
     for {
       g <- IO.apply(gs.asInstanceOf[Graphics2D])
-      _ <- drawIndexedTiles(g)(initialGrid.tiles.indexed)
+      _ <- drawIndexedTiles(g)(initialGrid.indexed)
     } yield ()
   }.unsafeRunSync()
 

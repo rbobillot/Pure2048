@@ -1,48 +1,75 @@
 package com.github.rbobillo.pure2048.grid
 
-object Merging extends Enumeration {
+object Merging {
 
   type Row = Array[Int]
   type Tiles = Array[Row]
   type IndexedTiles = Array[(Int, Int, Int)]
 
-  val RIGHT, LEFT, UP, DOWN = Value
+  private type MaybeInts = List[Option[Int]]
+  private type Ints = Array[Option[Int]]
 
-  implicit class IndexingTiles(ts: Tiles) {
-    def indexed: IndexedTiles =
-      ts.zipWithIndex.flatMap { case (row, y) =>
-        row.zipWithIndex.map { case (n, x) =>
-          (n, x, y)
-        }
-      }
-  }
-
-  private def mergeRowRight(row: Row): Row =
-    row.filterNot(_ == 0).reverse.padTo(4, 0).reverse match {
-      case Array(a, b, c, d) if a == b && c == d => Array(0, 0, a + b, c + d)
-      case Array(a, b, c, d) if c == d           => Array(0, a, b, c + d)
-      case Array(a, b, c, d) if b == c           => Array(0, a, b + c, d)
-      case Array(a, b, c, d) if a == b           => Array(0, a + b, c, d)
-      case Array(a, b, c, d)                     => Array(a, b, c, d)
+  private val mergeWhenIdentical =
+    (current: Int, accumulator: MaybeInts) => accumulator match {
+      case Some(`current`) :: t => None :: Some(current + current) :: t
+      case t                    => Some(current) :: t
     }
 
-  val mergeRight: Tiles => Tiles = ts =>
+  private def mergeRowRight(rw: Row): Row =
+    rw.filterNot(_ == 0)
+      .foldRight[MaybeInts](Nil)(mergeWhenIdentical)
+      .flatten.toArray
+      .reverse.padTo(rw.length, 0).reverse
+
+  val mergeRight1: Tiles => Tiles = ts =>
     ts.map(mergeRowRight)
 
-  val mergeLeft: Tiles => Tiles = ts =>
+  val mergeLeft1: Tiles => Tiles = ts =>
     ts.map(_.reverse)
       .map(mergeRowRight)
       .map(_.reverse)
 
-  val mergeDown: Tiles => Tiles = ts =>
+  val mergeDown1: Tiles => Tiles = ts =>
     ts.transpose
       .map(mergeRowRight)
       .transpose
 
-  val mergeUp: Tiles => Tiles = ts =>
+  val mergeUp1: Tiles => Tiles = ts =>
     ts.transpose
       .map(_.reverse)
       .map(mergeRowRight)
+      .map(_.reverse)
+      .transpose
+
+  private val mergeLeftWhenIdentical =
+    (accumulator: Ints, current: Int) => accumulator.lastOption.flatten match {
+      case Some(`current`) => accumulator.dropRight(1) :+ Some(current + current) :+ None
+      case _               => accumulator :+ Some(current)
+    }
+
+  private def mergeRowLeft(rw: Row): Row =
+    rw.filterNot(_ == 0)
+      .foldLeft[Ints](Array.empty)(mergeLeftWhenIdentical)
+      .flatten
+      .padTo(rw.length, 0)
+
+  val mergeLeft: Tiles => Tiles = ts =>
+    ts.map(mergeRowLeft)
+
+  val mergeRight: Tiles => Tiles = ts =>
+    ts.map(_.reverse)
+      .map(mergeRowLeft)
+      .map(_.reverse)
+
+  val mergeUp: Tiles => Tiles = ts =>
+    ts.transpose
+      .map(mergeRowLeft)
+      .transpose
+
+  val mergeDown: Tiles => Tiles = ts =>
+    ts.transpose
+      .map(_.reverse)
+      .map(mergeRowLeft)
       .map(_.reverse)
       .transpose
 

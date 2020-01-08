@@ -10,30 +10,29 @@ class MergingSpecs extends WordSpec with Matchers with PrivateMethodTester {
 
     "properly move RIGHT in a given row" when {
 
-      val mergeRowRight = PrivateMethod[Row](Symbol("mergeRowRight"))
+      val mergeRowLeft = PrivateMethod[Row](Symbol("mergeRowLeft"))
 
       "they can move" in {
-        val rightMovableTiles1 = Array(2, 0, 0, 0)
-        val rightMoveTiles1 = Merging.invokePrivate(mergeRowRight(rightMovableTiles1))
-        val rightMovedTiles1 = Array(0, 0, 0, 2)
+        val leftMovableTiles1 = Array(0, 0, 0, 2)
+        val leftMoveTiles1 = Merging.invokePrivate(mergeRowLeft(leftMovableTiles1))
 
-        val rightMovableTiles2 = Array(0, 2, 0, 0)
-        val rightMoveTiles2 = Merging.invokePrivate(mergeRowRight(rightMovableTiles2))
-        val rightMovedTiles2 = Array(0, 0, 0, 2)
+        val leftMovableTiles2 = Array(0, 0, 2, 0)
+        val leftMoveTiles2 = Merging.invokePrivate(mergeRowLeft(leftMovableTiles2))
 
-        val rightMovableTiles3 = Array(0, 0, 2, 0)
-        val rightMoveTiles3 = Merging.invokePrivate(mergeRowRight(rightMovableTiles3))
-        val rightMovedTiles3 = Array(0, 0, 0, 2)
+        val leftMovableTiles3 = Array(0, 2, 0, 0)
+        val leftMoveTiles3 = Merging.invokePrivate(mergeRowLeft(leftMovableTiles3))
 
-        rightMoveTiles1 shouldEqual rightMovedTiles1
-        rightMoveTiles2 shouldEqual rightMovedTiles2
-        rightMoveTiles3 shouldEqual rightMovedTiles3
+        val leftMovedTiles = Array(2, 0, 0, 0)
+
+        leftMoveTiles1 shouldEqual leftMovedTiles
+        leftMoveTiles2 shouldEqual leftMovedTiles
+        leftMoveTiles3 shouldEqual leftMovedTiles
       }
 
       "they cannot move" in {
         val immutableTiles = Array(0, 0, 0, 2)
-        val moveTiles = Merging.invokePrivate(mergeRowRight(immutableTiles))
-        val movedTiles = Array(0, 0, 0, 2)
+        val moveTiles = Merging.invokePrivate(mergeRowLeft(immutableTiles))
+        val movedTiles = Array(2, 0, 0, 0)
 
         moveTiles shouldEqual movedTiles
       }
@@ -42,59 +41,59 @@ class MergingSpecs extends WordSpec with Matchers with PrivateMethodTester {
 
     "properly merge RIGHT in a row" when {
 
-      val mergeRowRight = PrivateMethod[Row](Symbol("mergeRowRight"))
+      val mergeRowLeft = PrivateMethod[Row](Symbol("mergeRowLeft"))
 
       "they can merge" in {
-        val rightMovableTiles1 = Array(2, 0, 0, 2)
-        val rightMoveTiles1 = Merging.invokePrivate(mergeRowRight(rightMovableTiles1))
-        val rightMovedTiles1 = Array(0, 0, 0, 4)
+        val leftMovableTiles1 = Array(2, 0, 0, 2)
+        val leftMoveTiles1 = Merging.invokePrivate(mergeRowLeft(leftMovableTiles1))
+        val leftMovedTiles1 = Array(4, 0, 0, 0)
 
-        val rightMovableTiles2 = Array(0, 2, 0, 2)
-        val rightMoveTiles2 = Merging.invokePrivate(mergeRowRight(rightMovableTiles2))
-        val rightMovedTiles2 = Array(0, 0, 0, 4)
+        val leftMovableTiles2 = Array(0, 2, 0, 2)
+        val leftMoveTiles2 = Merging.invokePrivate(mergeRowLeft(leftMovableTiles2))
+        val leftMovedTiles2 = Array(4, 0, 0, 0)
 
-        val rightMovableTiles3 = Array(0, 0, 2, 2)
-        val rightMoveTiles3 = Merging.invokePrivate(mergeRowRight(rightMovableTiles3))
-        val rightMovedTiles3 = Array(0, 0, 0, 4)
+        val leftMovableTiles3 = Array(0, 0, 2, 2)
+        val leftMoveTiles3 = Merging.invokePrivate(mergeRowLeft(leftMovableTiles3))
+        val leftMovedTiles3 = Array(4, 0, 0, 0)
 
-        val rightMovableTiles4 = Array(2, 2, 2, 2)
-        val rightMoveTiles4 = Merging.invokePrivate(mergeRowRight(rightMovableTiles4))
-        val rightMovedTiles4 = Array(0, 0, 4, 4)
+        val leftMovableTiles4 = Array(2, 2, 2, 2)
+        val leftMoveTiles4 = Merging.invokePrivate(mergeRowLeft(leftMovableTiles4))
+        val leftMovedTiles4 = Array(4, 4, 0, 0)
 
-        val rightMovableTiles5 = Array(2, 2, 0, 2)
-        val rightMoveTiles5 = Merging.invokePrivate(mergeRowRight(rightMovableTiles5))
-        val rightMovedTiles5 = Array(0, 0, 2, 4)
+        val leftMovableTiles5 = Array(2, 0, 2, 2)
+        val leftMoveTiles5 = Merging.invokePrivate(mergeRowLeft(leftMovableTiles5))
+        val leftMovedTiles5 = Array(4, 2, 0, 0)
 
-        val rightMovableTiles6 = Array(2, 4, 4, 2)
-        val rightMoveTiles6 = Merging.invokePrivate(mergeRowRight(rightMovableTiles6))
-        val rightMovedTiles6 = Array(0, 2, 8, 2)
+        val leftMovableTiles6 = Array(2, 4, 4, 2)
+        val leftMoveTiles6 = Merging.invokePrivate(mergeRowLeft(leftMovableTiles6))
+        val leftMovedTiles6 = Array(2, 8, 2, 0)
 
-        val rightMovableTiles7 = Array(2, 2, 2, 4)
-        val rightMoveTiles7 = Merging.invokePrivate(mergeRowRight(rightMovableTiles7))
-        val rightMovedTiles7 = Array(0, 2, 4, 4)
+        val leftMovableTiles7 = Array(2, 2, 2, 4)
+        val leftMoveTiles7 = Merging.invokePrivate(mergeRowLeft(leftMovableTiles7))
+        val leftMovedTiles7 = Array(4, 2, 4, 0)
 
-        val rightMovableTiles8 = Array(2, 2, 4, 4)
-        val rightMoveTiles8 = Merging.invokePrivate(mergeRowRight(rightMovableTiles8))
-        val rightMovedTiles8 = Array(0, 0, 4, 8)
+        val leftMovableTiles8 = Array(2, 2, 4, 4)
+        val leftMoveTiles8 = Merging.invokePrivate(mergeRowLeft(leftMovableTiles8))
+        val leftMovedTiles8 = Array(4, 8, 0, 0)
 
-        val rightMovableTiles9 = Array(16, 16, 4, 2)
-        val rightMoveTiles9 = Merging.invokePrivate(mergeRowRight(rightMovableTiles9))
-        val rightMovedTiles9 = Array(0, 32, 4, 2)
+        val leftMovableTiles9 = Array(16, 16, 4, 2)
+        val leftMoveTiles9 = Merging.invokePrivate(mergeRowLeft(leftMovableTiles9))
+        val leftMovedTiles9 = Array(32, 4, 2, 0)
 
-        rightMoveTiles1 shouldEqual rightMovedTiles1
-        rightMoveTiles2 shouldEqual rightMovedTiles2
-        rightMoveTiles3 shouldEqual rightMovedTiles3
-        rightMoveTiles4 shouldEqual rightMovedTiles4
-        rightMoveTiles5 shouldEqual rightMovedTiles5
-        rightMoveTiles6 shouldEqual rightMovedTiles6
-        rightMoveTiles7 shouldEqual rightMovedTiles7
-        rightMoveTiles8 shouldEqual rightMovedTiles8
-        rightMoveTiles9 shouldEqual rightMovedTiles9
+        leftMoveTiles1 shouldEqual leftMovedTiles1
+        leftMoveTiles2 shouldEqual leftMovedTiles2
+        leftMoveTiles3 shouldEqual leftMovedTiles3
+        leftMoveTiles4 shouldEqual leftMovedTiles4
+        leftMoveTiles5 shouldEqual leftMovedTiles5
+        leftMoveTiles6 shouldEqual leftMovedTiles6
+        leftMoveTiles7 shouldEqual leftMovedTiles7
+        leftMoveTiles8 shouldEqual leftMovedTiles8
+        leftMoveTiles9 shouldEqual leftMovedTiles9
       }
 
       "they cannot merge" in {
         val immutableTiles = Array(4, 2, 4, 2)
-        val moveTiles = Merging.invokePrivate(mergeRowRight(immutableTiles))
+        val moveTiles = Merging.invokePrivate(mergeRowLeft(immutableTiles))
         val movedTiles = Array(4, 2, 4, 2)
 
         moveTiles shouldEqual movedTiles
