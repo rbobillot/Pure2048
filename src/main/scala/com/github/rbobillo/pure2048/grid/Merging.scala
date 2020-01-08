@@ -6,50 +6,15 @@ object Merging {
   type Tiles = Array[Row]
   type IndexedTiles = Array[(Int, Int, Int)]
 
-  private type MaybeInts = List[Option[Int]]
-  private type Ints = Array[Option[Int]]
-
-  private val mergeWhenIdentical =
-    (current: Int, accumulator: MaybeInts) => accumulator match {
-      case Some(`current`) :: t => None :: Some(current + current) :: t
-      case t                    => Some(current) :: t
-    }
-
-  private def mergeRowRight(rw: Row): Row =
-    rw.filterNot(_ == 0)
-      .foldRight[MaybeInts](Nil)(mergeWhenIdentical)
-      .flatten.toArray
-      .reverse.padTo(rw.length, 0).reverse
-
-  val mergeRight1: Tiles => Tiles = ts =>
-    ts.map(mergeRowRight)
-
-  val mergeLeft1: Tiles => Tiles = ts =>
-    ts.map(_.reverse)
-      .map(mergeRowRight)
-      .map(_.reverse)
-
-  val mergeDown1: Tiles => Tiles = ts =>
-    ts.transpose
-      .map(mergeRowRight)
-      .transpose
-
-  val mergeUp1: Tiles => Tiles = ts =>
-    ts.transpose
-      .map(_.reverse)
-      .map(mergeRowRight)
-      .map(_.reverse)
-      .transpose
-
-  private val mergeLeftWhenIdentical =
-    (accumulator: Ints, current: Int) => accumulator.lastOption.flatten match {
-      case Some(`current`) => accumulator.dropRight(1) :+ Some(current + current) :+ None
-      case _               => accumulator :+ Some(current)
+  private val mergeTilesWhenIdentical =
+    (mergedTiles: Array[Option[Int]], newTile: Int) => mergedTiles.lastOption.flatten match {
+      case Some(`newTile`) => mergedTiles.dropRight(1) :+ Some(newTile + newTile) :+ None // ([Some(4), Some(2)], 2) => [Some(4)] :+ Some(2+2) => [Some(4), Some(4)]
+      case _               => mergedTiles :+ Some(newTile) // ([Some(4)], 2) => [Some(4)] :+ Some(2) => [Some(4), Some(2)]
     }
 
   private def mergeRowLeft(rw: Row): Row =
     rw.filterNot(_ == 0)
-      .foldLeft[Ints](Array.empty)(mergeLeftWhenIdentical)
+      .foldLeft(Array.empty[Option[Int]])(mergeTilesWhenIdentical)
       .flatten
       .padTo(rw.length, 0)
 
