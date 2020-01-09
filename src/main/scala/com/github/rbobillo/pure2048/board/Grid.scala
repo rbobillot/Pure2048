@@ -1,8 +1,9 @@
 package com.github.rbobillo.pure2048.board
 
 import Merging.{ IndexedTiles, Tiles }
-import com.github.rbobillo.pure2048.dto.Direction
 import com.github.rbobillo.pure2048.Config.config
+import com.github.rbobillo.pure2048.Direction
+
 import scala.util.Random
 
 case class Grid(tiles: Tiles,
@@ -14,8 +15,8 @@ case class Grid(tiles: Tiles,
 
     val Seq((x, y), _*) =
       Random.shuffle(
-        (0 until config.gridHeight)
-          .flatMap(x => (0 until config.gridWidth).map(_ -> x))
+        (0 until config.gridWidth)
+          .flatMap(x => (0 until config.gridHeight).map(_ -> x))
           .filterNot(fullTiles))
 
     this.copy(tiles.updated(x, tiles(x).updated(y, newTileValue)))

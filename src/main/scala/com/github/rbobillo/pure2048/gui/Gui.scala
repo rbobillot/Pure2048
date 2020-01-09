@@ -1,20 +1,26 @@
 package com.github.rbobillo.pure2048.gui
 
-import java.awt.{ Color, Dimension, Font, Graphics2D }
+import java.awt.{ Dimension, Font, Graphics2D }
 
-import akka.actor.ActorRef
 import cats.effect.IO
 import com.github.rbobillo.pure2048.Config.config
-import com.github.rbobillo.pure2048.board.Grid
 import javax.swing.JFrame
 
 object Gui {
 
-  private def createFrameAndPanel(width: Int, height: Int, gameBoardActor: ActorRef): IO[BoardPanel] =
+  def drawCenteredString(g: Graphics2D)(s: String, f: Font, x: Int, y: Int, w: Int, h: Int): IO[Unit] =
+    for {
+      m <- IO.apply(g.getFontMetrics(f))
+      i <- IO.apply(x + (w - m.stringWidth(s)) / 2)
+      j <- IO.apply(y + ((h - m.getHeight) / 2) + m.getAscent)
+      _ <- IO.apply(g.drawString(s, i, j))
+    } yield ()
+
+  private def createFrameAndPanel(width: Int, height: Int): IO[BoardPanel] =
     for {
       f <- IO.pure(new JFrame)
       d <- IO.pure(new Dimension(width, height))
-      p <- IO.pure(new BoardPanel(f, gameBoardActor))
+      p <- IO.pure(new BoardPanel(f))
       _ <- IO.apply(p.setPreferredSize(d))
     } yield p
 
@@ -27,9 +33,9 @@ object Gui {
       _ <- IO.apply(frame.addKeyListener(panel))
     } yield frame
 
-  def initGUI(gameBoardActor: ActorRef): IO[BoardPanel] =
+  def initGUI: IO[BoardPanel] =
     for {
-      p <- createFrameAndPanel(config.boardWidth, config.boardHeight, gameBoardActor)
+      p <- createFrameAndPanel(config.boardWidth, config.boardHeight)
       _ <- initFrame(frame = p.frame, panel = p)
     } yield p
 

@@ -3,19 +3,21 @@ package com.github.rbobillo.pure2048.gui
 import java.awt.{ Color, Font, Graphics, Graphics2D }
 import java.awt.event.{ KeyEvent, KeyListener }
 
-import akka.actor.ActorRef
 import cats.effect.IO
 import com.github.rbobillo.pure2048.Config.config
-import com.github.rbobillo.pure2048.dto.Direction
+import com.github.rbobillo.pure2048.Direction
 import com.github.rbobillo.pure2048.board.Merging.IndexedTiles
-import com.github.rbobillo.pure2048.board.{ BoardHandler, Grid }
+import com.github.rbobillo.pure2048.board.BoardHandler
 import javax.swing.{ JFrame, JPanel }
 
-class BoardPanel(val frame: JFrame, gameBoardActor: ActorRef) extends JPanel with KeyListener {
+class BoardPanel(val frame: JFrame) extends JPanel with KeyListener {
 
   private val wOffset = config.boardWidth / config.gridWidth
   private val hOffset = config.boardHeight / config.gridHeight
 
+  // TODO: Maybe most of these functions should be Gui's object methods ?
+
+  // TODO: Fix splitters drawing, when grid dimensions are not the same: 4x5, for example
   private def drawSplitters(g: Graphics2D): IO[Unit] =
     for {
       of <- IO.pure(config.boardWidth / config.gridWidth)
@@ -28,12 +30,11 @@ class BoardPanel(val frame: JFrame, gameBoardActor: ActorRef) extends JPanel wit
     for {
       xx <- IO.pure(x * wOffset)
       yy <- IO.pure(y * hOffset)
-      f <- IO.pure(new Font("Helvetica Neue", Font.BOLD, 42))
+      f <- IO.pure(new Font("Helvetica Neue", Font.BOLD, hOffset / 3))
       n <- IO.pure(v.toString.dropWhile(_ == '0'))
-      c <- IO.pure(wOffset / 2 - 12 * n.length)
       _ <- IO.apply(g.setColor(config.tileColor(v).font))
       _ <- IO.apply(g.setFont(f))
-      _ <- IO.apply(g.drawString(n, xx + c, yy + hOffset / 2 + 12))
+      _ <- Gui.drawCenteredString(g)(n, f, xx, yy, wOffset, hOffset)
     } yield ()
 
   private def drawTileBackGround(g: Graphics2D)(v: Int, x: Int, y: Int): IO[Unit] =
@@ -60,17 +61,17 @@ class BoardPanel(val frame: JFrame, gameBoardActor: ActorRef) extends JPanel wit
     for {
       _ <- IO.apply(frame.removeAll())
       _ <- IO.apply(frame.setBackground(config.boardBackgroundColor))
-      f <- IO.pure(new Font("Helvetica Neue", Font.BOLD, 42))
+      f <- IO.pure(new Font("Helvetica Neue", Font.BOLD, hOffset / 3))
       _ <- IO.apply(g.setColor(new Color(187, 173, 160, 30)))
       _ <- IO.apply(g.fillRect(0, 0, config.boardWidth, config.boardHeight))
       _ <- IO.apply(g.setColor(Color.DARK_GRAY))
       _ <- IO.apply(g.setFont(f))
-      _ <- IO.apply(g.drawString(msg, config.boardWidth / 2 - msg.length * 12, config.boardHeight / 2 + 12))
+      _ <- Gui.drawCenteredString(g)(msg, f, 0, 0, config.boardWidth, config.boardHeight)
     } yield ()
 
   override def keyPressed(e: KeyEvent): Unit =
     (e.getKeyCode match {
-      case KeyEvent.VK_RIGHT => BoardHandler.merge(Direction.RIGHT)(this) // gameBoardActor ! MergeGrid(Direction.RIGHT)
+      case KeyEvent.VK_RIGHT => BoardHandler.merge(Direction.RIGHT)(this)
       case KeyEvent.VK_LEFT  => BoardHandler.merge(Direction.LEFT)(this)
       case KeyEvent.VK_DOWN  => BoardHandler.merge(Direction.DOWN)(this)
       case KeyEvent.VK_UP    => BoardHandler.merge(Direction.UP)(this)

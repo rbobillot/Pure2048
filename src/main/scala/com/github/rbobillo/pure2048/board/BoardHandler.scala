@@ -3,22 +3,24 @@ package com.github.rbobillo.pure2048.board
 import java.awt.Graphics2D
 
 import cats.effect.IO
-import com.github.rbobillo.pure2048.Config
-import com.github.rbobillo.pure2048.dto.Direction
+import com.github.rbobillo.pure2048.{ Config, Direction }
 import com.github.rbobillo.pure2048.gui.BoardPanel
 
 object BoardHandler {
 
-  var grid: Grid = _
+  var grid: Grid = _ // TODO: different state handling ? -> DB, File.. ?
+
+  private def updateGrid(newGrid: Grid): IO[Unit] = IO.apply { grid = newGrid }
 
   private def updateBoard(newGrid: Grid)(boardPanel: BoardPanel, g: Graphics2D): IO[Unit] =
     for {
       // reload grid
-      _ <- IO.apply { grid = newGrid }
+      _ <- updateGrid(newGrid)
       _ <- boardPanel.drawIndexedTiles(g)(grid.indexed)
       // sleep and add tile
-      _ <- IO.apply { Thread.sleep(50) }
-      _ <- IO.apply { grid = newGrid.addTile() }
+      _ <- IO.apply(Thread.sleep(50))
+      n <- IO.apply(newGrid.addTile())
+      _ <- updateGrid(n)
       _ <- boardPanel.drawIndexedTiles(g)(grid.indexed)
       _ <- IO.apply(boardPanel.frame.setTitle(s"2048 - Score: ${grid.score}"))
     } yield ()
@@ -38,7 +40,7 @@ object BoardHandler {
       it <- IO.pure(Array.fill(cc.gridHeight)(Array.fill(cc.gridWidth)(0)))
       g0 <- IO.pure(Grid(tiles = it))
       g1 <- IO.apply(g0.addTile().addTile())
-      _ <- IO.apply { grid = g1 }
+      _ <- updateGrid(g1)
     } yield g1
 
 }
