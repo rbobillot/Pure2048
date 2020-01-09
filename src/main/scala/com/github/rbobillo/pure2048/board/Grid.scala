@@ -1,4 +1,4 @@
-package com.github.rbobillo.pure2048.grid
+package com.github.rbobillo.pure2048.board
 
 import Merging.{ IndexedTiles, Tiles }
 import com.github.rbobillo.pure2048.dto.Direction
@@ -20,6 +20,11 @@ case class Grid(tiles: Tiles,
 
     this.copy(tiles.updated(x, tiles(x).updated(y, newTileValue)))
   }
+
+  def differs(newGrid: Grid): Boolean =
+    this.indexed.map(_._1)
+      .zip(newGrid.indexed.map(_._1))
+      .exists(x => x._1 != x._2) && !newGrid.isGameLost
 
   def isGameLost: Boolean =
     Seq(Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP).foldLeft(tiles :: Nil) { (tss, d) =>

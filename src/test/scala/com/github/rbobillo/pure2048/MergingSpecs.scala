@@ -1,7 +1,7 @@
 package com.github.rbobillo.pure2048
 
-import com.github.rbobillo.pure2048.grid.Merging
-import com.github.rbobillo.pure2048.grid.Merging.Row
+import com.github.rbobillo.pure2048.board.Merging
+import com.github.rbobillo.pure2048.board.Merging.Row
 import org.scalatest.{ Matchers, PrivateMethodTester, WordSpec }
 
 class MergingSpecs extends WordSpec with Matchers with PrivateMethodTester {
