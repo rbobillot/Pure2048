@@ -25,7 +25,7 @@ case class Grid(tiles: Tiles,
   def differs(newGrid: Grid): Boolean =
     this.indexed.map(_._1)
       .zip(newGrid.indexed.map(_._1))
-      .exists(x => x._1 != x._2) && !newGrid.isGameLost
+      .exists(x => x._1 != x._2) && !newGrid.isGameLost && !newGrid.isGameWon
 
   def isGameLost: Boolean =
     Seq(Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP).foldLeft(tiles :: Nil) { (tss, d) =>
@@ -33,7 +33,7 @@ case class Grid(tiles: Tiles,
     }.transpose.forall(xs => xs.forall(_ sameElements xs.head))
 
   def isGameWon: Boolean =
-    tiles.flatten.contains(2048)
+    tiles.flatten.contains(config.victoryValue)
 
   def indexed: IndexedTiles =
     tiles.zipWithIndex.flatMap { case (row, y) =>

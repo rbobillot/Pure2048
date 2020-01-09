@@ -2,7 +2,7 @@ import scalariform.formatter.preferences._
 
 name := "Pure2048"
 
-version := "0.0.3-SNAPSHOT"
+version := "0.1.0-SNAPSHOT"
 
 assemblyJarName in assembly := s"${name.value}-${version.value}.jar"
 

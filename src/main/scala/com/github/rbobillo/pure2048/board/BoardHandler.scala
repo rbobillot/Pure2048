@@ -34,6 +34,13 @@ object BoardHandler {
       _ <- if (m._2.isGameWon) boardPanel.showGameStopMessage(g)("Game Won") else IO.unit
     } yield ()
 
+  def reset(boardPanel: BoardPanel): IO[Unit] =
+    for {
+      n <- initGrid
+      g <- IO.apply(boardPanel.frame.getGraphics.asInstanceOf[Graphics2D])
+      _ <- boardPanel.drawIndexedTiles(g)(n.indexed)
+    } yield ()
+
   def initGrid: IO[Grid] =
     for {
       cc <- IO.pure(Config.config)

@@ -59,8 +59,8 @@ class BoardPanel(val frame: JFrame) extends JPanel with KeyListener {
 
   def showGameStopMessage(g: Graphics2D)(msg: String): IO[Unit] =
     for {
-      _ <- IO.apply(frame.removeAll())
-      _ <- IO.apply(frame.setBackground(config.boardBackgroundColor))
+      //_ <- IO.apply(frame.removeAll())
+      //_ <- IO.apply(frame.setBackground(config.boardBackgroundColor))
       f <- IO.pure(new Font("Helvetica Neue", Font.BOLD, hOffset / 3))
       _ <- IO.apply(g.setColor(new Color(187, 173, 160, 30)))
       _ <- IO.apply(g.fillRect(0, 0, config.boardWidth, config.boardHeight))
@@ -75,6 +75,7 @@ class BoardPanel(val frame: JFrame) extends JPanel with KeyListener {
       case KeyEvent.VK_LEFT  => BoardHandler.merge(Direction.LEFT)(this)
       case KeyEvent.VK_DOWN  => BoardHandler.merge(Direction.DOWN)(this)
       case KeyEvent.VK_UP    => BoardHandler.merge(Direction.UP)(this)
+      case KeyEvent.VK_R     => BoardHandler.reset(this)
       case _                 => IO.unit
     }).unsafeRunSync()
 
