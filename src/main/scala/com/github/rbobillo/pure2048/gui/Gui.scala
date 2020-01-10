@@ -1,17 +1,17 @@
 package com.github.rbobillo.pure2048.gui
 
-import java.awt.{ Dimension, Font, Graphics2D, Point, Rectangle }
-import java.awt.event.{ ActionEvent, ActionListener, ComponentAdapter, ComponentEvent }
+import java.awt.{ Dimension, Font, Graphics2D, Point, Rectangle, Shape }
+import java.awt.event.{ ActionEvent, ComponentAdapter, ComponentEvent }
 
 import cats.effect.IO
 import com.github.rbobillo.pure2048.Config.config
-import com.github.rbobillo.pure2048.board.BoardHandler
 import javax.swing.{ JComponent, JFrame, Timer }
 
 object Gui {
 
-  val wOffset: Int = config.boardWidth / config.gridWidth
-  val hOffset: Int = config.boardHeight / config.gridHeight
+  val spacing: Int = (config.boardWidth / config.gridWidth + config.boardHeight / config.gridHeight) / 2 / 10
+  val wOffset: Int = config.boardWidth / config.gridWidth - spacing / config.gridWidth
+  val hOffset: Int = config.boardHeight / config.gridHeight - spacing / config.gridHeight
 
   def changeTitle(frame: JFrame)(msg: String): IO[Unit] =
     for {
@@ -27,14 +27,14 @@ object Gui {
       _ <- IO.apply(g.drawString(s, i, j))
     } yield ()
 
-  def slide(component: JComponent, newPoint: Point, interval: Int): IO[Unit] =
+  def slide(component: Rectangle, newPoint: Point): IO[Unit] =
     for {
       frames <- IO.pure(5) // TODO: should it be linked to grid width/length ?
-      bounds <- IO.apply(component.getBounds())
+      bounds <- IO.apply(component.getBounds)
       source <- IO.pure(new Point(bounds.x, bounds.y))
       target <- IO.pure(new Point((newPoint.x - source.x) / frames, (newPoint.y - source.y) / frames))
       _ <- IO.apply {
-        new Timer(interval, (e: ActionEvent) => (0 to frames).map { currentFrame =>
+        new Timer(10, (e: ActionEvent) => (0 to frames).map { currentFrame =>
           component.setBounds(
             source.x + (target.x * currentFrame),
             source.y + (target.y * currentFrame),

@@ -1,27 +1,18 @@
 package com.github.rbobillo.pure2048.gui
 
-import java.awt.{ Color, Font, Graphics, Graphics2D }
+import java.awt.{ Color, Font, Graphics, Graphics2D, Point, Rectangle }
 import java.awt.event.{ KeyEvent, KeyListener }
 
 import cats.effect.IO
 import com.github.rbobillo.pure2048.Config.config
 import com.github.rbobillo.pure2048.board.Merging.IndexedTiles
-import com.github.rbobillo.pure2048.gui.Gui.{ hOffset, wOffset }
+import com.github.rbobillo.pure2048.gui.Gui.{ hOffset, spacing, wOffset }
 import com.github.rbobillo.pure2048.board.{ BoardHandler, Direction, Grid, Tile }
 import javax.swing.{ JFrame, JPanel }
 
 class BoardPanel(val frame: JFrame) extends JPanel with KeyListener {
 
   // TODO: Maybe most of these functions should be Gui's object methods ?
-
-  // TODO: Fix splitters drawing, when grid dimensions are not the same: 4x5, for example
-  private def drawSplitters(g: Graphics2D): IO[Unit] =
-    for {
-      of <- IO.pure(config.boardWidth / config.gridWidth)
-      _ <- IO.apply(g.setColor(config.boardBackgroundColor))
-      _ <- IO.apply((0 to config.gridHeight).foreach(n => g.fillRect(n * of - 5, 0 * of, 10, config.boardHeight))) // vertical lines
-      _ <- IO.apply((0 to config.gridWidth).foreach(n => g.fillRect(0 * of, n * of - 5, config.boardWidth, 10))) // horizontal lines
-    } yield ()
 
   private def drawTileText(g: Graphics2D)(v: Int, x: Int, y: Int): IO[Unit] =
     for {
@@ -31,7 +22,7 @@ class BoardPanel(val frame: JFrame) extends JPanel with KeyListener {
       n <- IO.pure(v.toString.dropWhile(_ == '0'))
       _ <- IO.apply(g.setColor(config.tileColor(v).font))
       _ <- IO.apply(g.setFont(f))
-      _ <- Gui.drawCenteredString(g)(n, f, xx, yy, wOffset, hOffset)
+      _ <- Gui.drawCenteredString(g)(n, f, xx + spacing, yy + spacing, wOffset - spacing, hOffset - spacing)
     } yield ()
 
   private def drawTileBackGround(g: Graphics2D)(v: Int, x: Int, y: Int): IO[Unit] =
@@ -39,11 +30,14 @@ class BoardPanel(val frame: JFrame) extends JPanel with KeyListener {
       xx <- IO.pure(x * wOffset)
       yy <- IO.pure(y * hOffset)
       _ <- IO.apply(g.setColor(config.tileColor(v).background))
-      _ <- IO.apply(g.fillRoundRect(xx + wOffset / 20, yy + wOffset / 20, wOffset - wOffset / 10, hOffset - wOffset / 10, 15, 15))
+      _ <- IO.apply(g.fillRoundRect(xx + spacing, yy + spacing, wOffset - spacing, hOffset - spacing, 15, 15))
     } yield ()
 
   private def drawTile(g: Graphics2D)(t: Tile, x: Int, y: Int, prev: IndexedTiles): IO[Unit] =
     for {
+      //o <- IO.pure(prev.groupBy(_._1.id).get(t.id).flatMap(_.headOption).getOrElse(t, x, y))
+      //r <- IO.apply(g.clipRect(o._2, o._3, wOffset - wOffset / 10, hOffset - hOffset / 10))
+      //_ <- Gui.slide(g.getClip.asInstanceOf[Rectangle], new Point(x, y))
       _ <- drawTileBackGround(g)(t.v, x, y)
       _ <- drawTileText(g)(t.v, x, y)
     } yield ()
