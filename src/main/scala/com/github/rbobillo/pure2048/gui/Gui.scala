@@ -27,8 +27,9 @@ object Gui {
       _ <- IO.apply(g.drawString(s, i, j))
     } yield ()
 
-  def slide(component: JComponent, newPoint: Point, frames: Int, interval: Int): IO[Unit] =
+  def slide(component: JComponent, newPoint: Point, interval: Int): IO[Unit] =
     for {
+      frames <- IO.pure(5) // TODO: should it be linked to grid width/length ?
       bounds <- IO.apply(component.getBounds())
       source <- IO.pure(new Point(bounds.x, bounds.y))
       target <- IO.pure(new Point((newPoint.x - source.x) / frames, (newPoint.y - source.y) / frames))
@@ -60,7 +61,7 @@ object Gui {
       _ <- IO.apply(frame.addKeyListener(panel))
       _ <- IO.apply(frame.setFocusable(true))
       _ <- IO.apply(frame.setResizable(false))
-      _ <- IO.apply(frame.setTitle(s"2048"))
+      _ <- IO.apply(frame.setTitle("2048"))
       _ <- IO.apply(frame.validate())
     } yield frame
 

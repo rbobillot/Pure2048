@@ -5,10 +5,9 @@ import java.awt.event.{ KeyEvent, KeyListener }
 
 import cats.effect.IO
 import com.github.rbobillo.pure2048.Config.config
-import com.github.rbobillo.pure2048.Direction
-import com.github.rbobillo.pure2048.gui.Gui.{ hOffset, wOffset }
 import com.github.rbobillo.pure2048.board.Merging.IndexedTiles
-import com.github.rbobillo.pure2048.board.BoardHandler
+import com.github.rbobillo.pure2048.gui.Gui.{ hOffset, wOffset }
+import com.github.rbobillo.pure2048.board.{ BoardHandler, Direction, Grid, Tile }
 import javax.swing.{ JFrame, JPanel }
 
 class BoardPanel(val frame: JFrame) extends JPanel with KeyListener {
@@ -40,20 +39,20 @@ class BoardPanel(val frame: JFrame) extends JPanel with KeyListener {
       xx <- IO.pure(x * wOffset)
       yy <- IO.pure(y * hOffset)
       _ <- IO.apply(g.setColor(config.tileColor(v).background))
-      _ <- IO.apply(g.fillRect(xx, yy, xx + wOffset, yy + hOffset))
+      _ <- IO.apply(g.fillRoundRect(xx + wOffset / 20, yy + wOffset / 20, wOffset - wOffset / 10, hOffset - wOffset / 10, 15, 15))
     } yield ()
 
-  private def drawTile(g: Graphics2D)(v: Int, x: Int, y: Int): IO[Unit] =
+  private def drawTile(g: Graphics2D)(t: Tile, x: Int, y: Int, prev: IndexedTiles): IO[Unit] =
     for {
-      _ <- drawTileBackGround(g)(v, x, y)
-      _ <- drawTileText(g)(v, x, y)
+      _ <- drawTileBackGround(g)(t.v, x, y)
+      _ <- drawTileText(g)(t.v, x, y)
     } yield ()
 
-  def drawIndexedTiles(g: Graphics2D)(its: IndexedTiles): IO[Unit] =
+  def drawIndexedTiles(g: Graphics2D)(grid: Grid): IO[Unit] =
     for {
-      _ <- IO.apply(its.map { case (v, x, y) => drawTile(g)(v, x, y).unsafeRunSync() })
-      _ <- drawSplitters(g)
-      _ <- IO.apply(repaint())
+      its <- IO.pure(grid.indexedTiles)
+      _ <- IO.apply(frame.setBackground(config.boardBackgroundColor))
+      _ <- IO.apply(its.map { case (t, x, y) => drawTile(g)(t, x, y, grid.indexedPrev).unsafeRunSync() })
     } yield ()
 
   // TODO: Fix: drawIndexedTiles's repaint(), seems to block this action.
@@ -85,7 +84,7 @@ class BoardPanel(val frame: JFrame) extends JPanel with KeyListener {
   override def paint(gs: Graphics): Unit = {
     for {
       g <- IO.apply(gs.asInstanceOf[Graphics2D])
-      _ <- drawIndexedTiles(g)(BoardHandler.grid.indexed)
+      _ <- drawIndexedTiles(g)(BoardHandler.grid)
     } yield ()
   }.unsafeRunSync()
 

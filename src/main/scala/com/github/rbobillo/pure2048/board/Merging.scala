@@ -2,36 +2,36 @@ package com.github.rbobillo.pure2048.board
 
 object Merging {
 
-  type Row = Array[Int]
-  type Tiles = Array[Row]
-  type IndexedTiles = Array[(Int, Int, Int)]
+  type TilesRow = Array[Tile]
+  type TilesGrid = Array[TilesRow]
+  type IndexedTiles = Array[(Tile, Int, Int)]
 
   private val mergeTilesWhenIdentical =
-    (mergedTiles: Array[Option[Int]], newTile: Int) => mergedTiles.lastOption.flatten match {
-      case Some(`newTile`) => mergedTiles.dropRight(1) :+ Some(newTile + newTile) :+ None // ([Some(4), Some(2)], 2) => [Some(4)] :+ Some(2+2) => [Some(4), Some(4)]
-      case _               => mergedTiles :+ Some(newTile) // ([Some(4)], 2) => [Some(4)] :+ Some(2) => [Some(4), Some(2)]
+    (mergedTiles: Array[Option[Tile]], newTile: Tile) => mergedTiles.lastOption.flatten match {
+      case Some(Tile(newTile.v, _)) => mergedTiles.dropRight(1) :+ Some(newTile.copy(v = newTile.v * 2)) :+ None // ([Some(4), Some(2)], 2) => [Some(4)] :+ Some(2+2) => [Some(4), Some(4)]
+      case _                        => mergedTiles :+ Some(newTile) // ([Some(4)], 2) => [Some(4)] :+ Some(2) => [Some(4), Some(2)]
     }
 
-  private def mergeRowLeft(rw: Row): Row =
-    rw.filterNot(_ == 0)
-      .foldLeft(Array.empty[Option[Int]])(mergeTilesWhenIdentical)
+  private def mergeRowLeft(rw: TilesRow): TilesRow =
+    rw.filterNot(_.v == 0)
+      .foldLeft(Array.empty[Option[Tile]])(mergeTilesWhenIdentical)
       .flatten
-      .padTo(rw.length, 0)
+      .padTo(rw.length, Tile(0, 0))
 
-  val mergeLeft: Tiles => Tiles = ts =>
+  val mergeLeft: TilesGrid => TilesGrid = ts =>
     ts.map(mergeRowLeft)
 
-  val mergeRight: Tiles => Tiles = ts =>
+  val mergeRight: TilesGrid => TilesGrid = ts =>
     ts.map(_.reverse)
       .map(mergeRowLeft)
       .map(_.reverse)
 
-  val mergeUp: Tiles => Tiles = ts =>
+  val mergeUp: TilesGrid => TilesGrid = ts =>
     ts.transpose
       .map(mergeRowLeft)
       .transpose
 
-  val mergeDown: Tiles => Tiles = ts =>
+  val mergeDown: TilesGrid => TilesGrid = ts =>
     ts.transpose
       .map(_.reverse)
       .map(mergeRowLeft)
