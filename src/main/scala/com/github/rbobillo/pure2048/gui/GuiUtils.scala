@@ -4,7 +4,7 @@ import java.awt.{ Font, Graphics2D, Point, Rectangle }
 import java.awt.event.ActionEvent
 
 import cats.effect.IO
-import javax.swing.{ JFrame, Timer }
+import javax.swing.{ JComponent, JFrame, Timer }
 
 object GuiUtils {
 
@@ -22,10 +22,10 @@ object GuiUtils {
       _ <- IO.apply(g.drawString(s, i, j))
     } yield ()
 
-  def slide(component: Rectangle, newPoint: Point): IO[Unit] =
+  def slide(component: JComponent, newPoint: Point): IO[Unit] =
     for {
       frames <- IO.pure(5) // TODO: should it be linked to grid width/length ?
-      bounds <- IO.apply(component.getBounds)
+      bounds <- IO.apply(component.getBounds())
       source <- IO.pure(new Point(bounds.x, bounds.y))
       target <- IO.pure(new Point((newPoint.x - source.x) / frames, (newPoint.y - source.y) / frames))
       _ <- IO.apply {

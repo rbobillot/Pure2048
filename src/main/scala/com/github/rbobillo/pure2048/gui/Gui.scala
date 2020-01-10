@@ -15,10 +15,6 @@ object Gui {
   val wOffset: Int = config.boardWidth / config.gridWidth - spacing / config.gridWidth
   val hOffset: Int = config.boardHeight / config.gridHeight - spacing / config.gridHeight
 
-  /* ****************** */
-  /* **              ** */
-  /* ****************** */
-
   private def drawTileText(g: Graphics2D)(v: Int, x: Int, y: Int): IO[Unit] =
     for {
       xx <- IO.pure(x * wOffset)
@@ -42,22 +38,21 @@ object Gui {
   private def drawSlidingTile(g: Graphics2D)(t: Tile, x: Int, y: Int, prev: IndexedTiles): IO[Unit] = ???
   private def drawBasicTile(g: Graphics2D)(t: Tile, x: Int, y: Int, prev: IndexedTiles): IO[Unit] = ???
 
-  private def drawTile(g: Graphics2D)(t: Tile, x: Int, y: Int, prev: IndexedTiles): IO[Unit] =
+  private def drawTile(g: Graphics2D, p: BoardPanel)(t: Tile, x: Int, y: Int, prev: IndexedTiles): IO[Unit] =
     for {
       //o <- IO.pure(prev.find(_._1.id == t.id).getOrElse(t, x, y))
       //_ <- IO.apply(println(o))
       //_ <- IO.apply(g.clipRect(o._2, o._3, wOffset, hOffset))
-      //_ <- GuiUtils.slide(g.getClip.asInstanceOf[Rectangle], new Point(x, y))
+      //_ <- GuiUtils.slide(p, new Point(x, y))
       _ <- drawTileBackGround(g)(t.v, x, y)
       _ <- drawTileText(g)(t.v, x, y)
     } yield ()
 
-  def drawIndexedTiles(g: Graphics2D, frame: JFrame)(grid: Grid): IO[Unit] =
+  def drawIndexedTiles(g: Graphics2D, boardPanel: BoardPanel)(grid: Grid): IO[Unit] =
     for {
       its <- IO.pure(grid.indexedTiles)
-      _ <- IO.apply(frame.setBackground(config.boardBackgroundColor))
-      _ <- IO.apply(its.map { case (t, x, y) => drawTile(g)(Tile.empty, x, y, grid.indexedPrev).unsafeRunSync() })
-      _ <- IO.apply(its.map { case (t, x, y) => drawTile(g)(t, x, y, grid.indexedPrev).unsafeRunSync() })
+      _ <- IO.apply(boardPanel.frame.setBackground(config.boardBackgroundColor))
+      _ <- IO.apply(its.map { case (t, x, y) => drawTile(g, boardPanel)(t, x, y, grid.indexedPrev).unsafeRunSync() })
     } yield ()
 
   // TODO: Fix: too much repaint() seem to happen, and block this action.

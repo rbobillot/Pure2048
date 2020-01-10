@@ -16,7 +16,7 @@ object BoardHandler {
     for {
       n <- IO.apply(newGrid.addTile())
       _ <- updateGrid(if (isReset) newGrid else n)
-      _ <- Gui.drawIndexedTiles(g, boardPanel.frame)(grid)
+      _ <- Gui.drawIndexedTiles(g, boardPanel)(grid)
       _ <- GuiUtils.changeTitle(boardPanel.frame)(s"Score: ${grid.score}")
       _ <- IO.apply(boardPanel.repaint())
     } yield ()
@@ -28,8 +28,8 @@ object BoardHandler {
       _ <- if (m._1 differs m._2) updateBoard(m._2)(p, g) else IO.unit
       _ <- if (m._2.isGameLost) GuiUtils.changeTitle(p.frame)(s"Game Over - Score: ${grid.score}") else IO.unit
       _ <- if (m._2.isGameWon) GuiUtils.changeTitle(p.frame)(s"Game Won - Score: ${grid.score}") else IO.unit
-      //_ <- if (m._2.isGameLost) p.showGameStopMessage(g)(s"Game Over - Score: ${grid.score}") else IO.unit
-      //_ <- if (m._2.isGameWon) p.showGameStopMessage(g)(s"Game Won - Score: ${grid.score}") else IO.unit
+      //_ <- if (m._2.isGameLost) Gui.showGameStopMessage(g)(s"Game Over - Score: ${grid.score}") else IO.unit
+      //_ <- if (m._2.isGameWon) Gui.showGameStopMessage(g)(s"Game Won - Score: ${grid.score}") else IO.unit
     } yield ()
 
   def reset(boardPanel: BoardPanel): IO[Unit] =
