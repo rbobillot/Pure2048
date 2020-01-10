@@ -4,7 +4,7 @@ import java.awt.{ Color, Font, Graphics2D }
 
 import cats.effect.IO
 import com.github.rbobillo.pure2048.{ Config, Direction }
-import com.github.rbobillo.pure2048.gui.BoardPanel
+import com.github.rbobillo.pure2048.gui.{ BoardPanel, Gui }
 
 object BoardHandler {
 
@@ -14,24 +14,19 @@ object BoardHandler {
 
   private def updateBoard(newGrid: Grid)(boardPanel: BoardPanel, g: Graphics2D): IO[Unit] =
     for {
-      // reload grid
-      _ <- updateGrid(newGrid)
+      o <- IO.pure(grid)
+      _ <- updateGrid(newGrid.addTile())
       _ <- boardPanel.drawIndexedTiles(g)(grid.indexed)
-      // sleep and add tile
-      _ <- IO.apply(Thread.sleep(50))
-      n <- IO.apply(newGrid.addTile())
-      _ <- updateGrid(n)
-      _ <- boardPanel.drawIndexedTiles(g)(grid.indexed)
-      _ <- IO.apply(boardPanel.frame.setTitle(s"2048 - Score: ${grid.score}"))
+      _ <- Gui.changeTitle(boardPanel.frame)(s"Score: ${grid.score}")
     } yield ()
 
-  def merge(direction: Direction.Value)(boardPanel: BoardPanel): IO[Unit] =
+  def merge(direction: Direction.Value)(p: BoardPanel): IO[Unit] =
     for {
-      g <- IO.apply(boardPanel.frame.getGraphics.asInstanceOf[Graphics2D])
+      g <- IO.apply(p.frame.getGraphics.asInstanceOf[Graphics2D])
       m <- if (grid.isPlayable) IO.pure(grid merge direction) else IO.pure(grid -> grid)
-      _ <- if (m._1 differs m._2) updateBoard(m._2)(boardPanel, g) else IO.unit
-      _ <- if (m._2.isGameLost) boardPanel.showGameStopMessage(g)("Game Over") else IO.unit
-      _ <- if (m._2.isGameWon) boardPanel.showGameStopMessage(g)("Game Won") else IO.unit
+      _ <- if (m._1 differs m._2) updateBoard(m._2)(p, g) else IO.unit
+      _ <- if (m._2.isGameLost) Gui.changeTitle(p.frame)(s"Game Over - Score: ${grid.score}") else IO.unit
+      _ <- if (m._2.isGameWon) Gui.changeTitle(p.frame)(s"Game Won - Score: ${grid.score}") else IO.unit
     } yield ()
 
   def reset(boardPanel: BoardPanel): IO[Unit] =

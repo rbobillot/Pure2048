@@ -53,8 +53,11 @@ class BoardPanel(val frame: JFrame) extends JPanel with KeyListener {
     for {
       _ <- IO.apply(its.map { case (v, x, y) => drawTile(g)(v, x, y).unsafeRunSync() })
       _ <- drawSplitters(g)
+      _ <- IO.apply(repaint())
     } yield ()
 
+  // TODO: Fix: drawIndexedTiles's repaint(), seems to block this action.
+  //  Meanwhile, we call changeTitle instead
   def showGameStopMessage(g: Graphics2D)(msg: String): IO[Unit] =
     for {
       f <- IO.pure(new Font("Helvetica Neue", Font.BOLD, hOffset / 3))

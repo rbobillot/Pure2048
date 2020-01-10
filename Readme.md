@@ -15,4 +15,4 @@ You can also run the released binary
 
 Use the arrow keys to play. Have fun !
 
-![go-2048](https://user-images.githubusercontent.com/6177702/71899813-6df4e000-3154-11ea-945a-beabdfa71731.gif)
+![go-n-2048](https://user-images.githubusercontent.com/6177702/72117599-3cdc0180-3346-11ea-8344-aea5c14ed18f.gif)

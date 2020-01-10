@@ -1,16 +1,23 @@
 package com.github.rbobillo.pure2048.gui
 
 import java.awt.{ Dimension, Font, Graphics2D, Point, Rectangle }
-import java.awt.event.{ ActionEvent, ActionListener }
+import java.awt.event.{ ActionEvent, ActionListener, ComponentAdapter, ComponentEvent }
 
 import cats.effect.IO
 import com.github.rbobillo.pure2048.Config.config
+import com.github.rbobillo.pure2048.board.BoardHandler
 import javax.swing.{ JComponent, JFrame, Timer }
 
 object Gui {
 
   val wOffset: Int = config.boardWidth / config.gridWidth
   val hOffset: Int = config.boardHeight / config.gridHeight
+
+  def changeTitle(frame: JFrame)(msg: String): IO[Unit] =
+    for {
+      r <- IO.pure(" - Press 'r' to reset")
+      _ <- IO.apply(frame.setTitle(msg + r))
+    } yield ()
 
   def drawCenteredString(g: Graphics2D)(s: String, f: Font, x: Int, y: Int, w: Int, h: Int): IO[Unit] =
     for {
@@ -20,7 +27,7 @@ object Gui {
       _ <- IO.apply(g.drawString(s, i, j))
     } yield ()
 
-  private def slide(component: JComponent, newPoint: Point, frames: Int, interval: Int): IO[Unit] =
+  def slide(component: JComponent, newPoint: Point, frames: Int, interval: Int): IO[Unit] =
     for {
       bounds <- IO.apply(component.getBounds())
       source <- IO.pure(new Point(bounds.x, bounds.y))
@@ -52,6 +59,7 @@ object Gui {
       _ <- IO.apply(frame.setVisible(true))
       _ <- IO.apply(frame.addKeyListener(panel))
       _ <- IO.apply(frame.setFocusable(true))
+      _ <- IO.apply(frame.setResizable(false))
       _ <- IO.apply(frame.setTitle(s"2048"))
       _ <- IO.apply(frame.validate())
     } yield frame
