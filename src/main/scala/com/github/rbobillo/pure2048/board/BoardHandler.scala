@@ -4,7 +4,7 @@ import java.awt.{ Color, Font, Graphics2D }
 
 import cats.effect.IO
 import com.github.rbobillo.pure2048.Config
-import com.github.rbobillo.pure2048.gui.{ BoardPanel, Gui, GuiUtils }
+import com.github.rbobillo.pure2048.gui.{ BoardPanel, BoardGui, GuiUtils }
 
 object BoardHandler {
 
@@ -16,7 +16,7 @@ object BoardHandler {
     for {
       n <- IO.apply(newGrid.addTile())
       _ <- updateGrid(if (isReset) newGrid else n)
-      _ <- Gui.drawIndexedTiles(g, boardPanel)(grid)
+      _ <- BoardGui.drawIndexedTiles(g, boardPanel)(grid)
       _ <- GuiUtils.changeTitle(boardPanel.frame)(s"Score: ${grid.score}")
       _ <- IO.apply(boardPanel.repaint())
     } yield ()

@@ -26,7 +26,7 @@ class BoardPanel(val frame: JFrame) extends JPanel with KeyListener {
   override def paint(gs: Graphics): Unit = {
     for {
       g <- IO.apply(gs.asInstanceOf[Graphics2D])
-      _ <- Gui.drawIndexedTiles(g, this)(BoardHandler.grid)
+      _ <- BoardGui.drawIndexedTiles(g, this)(BoardHandler.grid)
     } yield ()
   }.unsafeRunSync()
 
