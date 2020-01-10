@@ -16,7 +16,7 @@ object Config {
 
   // TODO: Change this hardcoded Config... It should be done with PureConfig
   val config: GameConf = GameConf(
-    victoryValue         = 32,
+    victoryValue         = 2048,
     gridWidth            = 4,
     gridHeight           = 4,
     boardWidth           = 540,

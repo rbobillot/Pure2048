@@ -1,12 +1,16 @@
 package com.github.rbobillo.pure2048.gui
 
-import java.awt.{ Dimension, Font, Graphics2D }
+import java.awt.{ Dimension, Font, Graphics2D, Point, Rectangle }
+import java.awt.event.{ ActionEvent, ActionListener }
 
 import cats.effect.IO
 import com.github.rbobillo.pure2048.Config.config
-import javax.swing.JFrame
+import javax.swing.{ JComponent, JFrame, Timer }
 
 object Gui {
+
+  val wOffset: Int = config.boardWidth / config.gridWidth
+  val hOffset: Int = config.boardHeight / config.gridHeight
 
   def drawCenteredString(g: Graphics2D)(s: String, f: Font, x: Int, y: Int, w: Int, h: Int): IO[Unit] =
     for {
@@ -14,6 +18,22 @@ object Gui {
       i <- IO.apply(x + (w - m.stringWidth(s)) / 2)
       j <- IO.apply(y + ((h - m.getHeight) / 2) + m.getAscent)
       _ <- IO.apply(g.drawString(s, i, j))
+    } yield ()
+
+  private def slide(component: JComponent, newPoint: Point, frames: Int, interval: Int): IO[Unit] =
+    for {
+      bounds <- IO.apply(component.getBounds())
+      source <- IO.pure(new Point(bounds.x, bounds.y))
+      target <- IO.pure(new Point((newPoint.x - source.x) / frames, (newPoint.y - source.y) / frames))
+      _ <- IO.apply {
+        new Timer(interval, (e: ActionEvent) => (0 to frames).map { currentFrame =>
+          component.setBounds(
+            source.x + (target.x * currentFrame),
+            source.y + (target.y * currentFrame),
+            bounds.width,
+            bounds.height)
+        }.headOption.foreach(_ => e.getSource.asInstanceOf[Timer].stop())).start()
+      }
     } yield ()
 
   private def createFrameAndPanel(width: Int, height: Int): IO[BoardPanel] =
@@ -31,6 +51,9 @@ object Gui {
       _ <- IO.apply(frame.pack())
       _ <- IO.apply(frame.setVisible(true))
       _ <- IO.apply(frame.addKeyListener(panel))
+      _ <- IO.apply(frame.setFocusable(true))
+      _ <- IO.apply(frame.setTitle(s"2048"))
+      _ <- IO.apply(frame.validate())
     } yield frame
 
   def initGUI: IO[BoardPanel] =

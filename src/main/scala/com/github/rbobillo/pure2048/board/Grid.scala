@@ -25,7 +25,9 @@ case class Grid(tiles: Tiles,
   def differs(newGrid: Grid): Boolean =
     this.indexed.map(_._1)
       .zip(newGrid.indexed.map(_._1))
-      .exists(x => x._1 != x._2) && !newGrid.isGameLost && !newGrid.isGameWon
+      .exists(x => x._1 != x._2)
+
+  def isPlayable: Boolean = !isGameLost && !isGameWon
 
   def isGameLost: Boolean =
     Seq(Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP).foldLeft(tiles :: Nil) { (tss, d) =>

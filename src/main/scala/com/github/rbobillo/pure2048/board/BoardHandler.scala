@@ -1,6 +1,6 @@
 package com.github.rbobillo.pure2048.board
 
-import java.awt.Graphics2D
+import java.awt.{ Color, Font, Graphics2D }
 
 import cats.effect.IO
 import com.github.rbobillo.pure2048.{ Config, Direction }
@@ -27,8 +27,8 @@ object BoardHandler {
 
   def merge(direction: Direction.Value)(boardPanel: BoardPanel): IO[Unit] =
     for {
-      m <- IO.pure(grid merge direction)
       g <- IO.apply(boardPanel.frame.getGraphics.asInstanceOf[Graphics2D])
+      m <- if (grid.isPlayable) IO.pure(grid merge direction) else IO.pure(grid -> grid)
       _ <- if (m._1 differs m._2) updateBoard(m._2)(boardPanel, g) else IO.unit
       _ <- if (m._2.isGameLost) boardPanel.showGameStopMessage(g)("Game Over") else IO.unit
       _ <- if (m._2.isGameWon) boardPanel.showGameStopMessage(g)("Game Won") else IO.unit

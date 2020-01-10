@@ -6,14 +6,12 @@ import java.awt.event.{ KeyEvent, KeyListener }
 import cats.effect.IO
 import com.github.rbobillo.pure2048.Config.config
 import com.github.rbobillo.pure2048.Direction
+import com.github.rbobillo.pure2048.gui.Gui.{ hOffset, wOffset }
 import com.github.rbobillo.pure2048.board.Merging.IndexedTiles
 import com.github.rbobillo.pure2048.board.BoardHandler
 import javax.swing.{ JFrame, JPanel }
 
 class BoardPanel(val frame: JFrame) extends JPanel with KeyListener {
-
-  private val wOffset = config.boardWidth / config.gridWidth
-  private val hOffset = config.boardHeight / config.gridHeight
 
   // TODO: Maybe most of these functions should be Gui's object methods ?
 
@@ -59,8 +57,6 @@ class BoardPanel(val frame: JFrame) extends JPanel with KeyListener {
 
   def showGameStopMessage(g: Graphics2D)(msg: String): IO[Unit] =
     for {
-      //_ <- IO.apply(frame.removeAll())
-      //_ <- IO.apply(frame.setBackground(config.boardBackgroundColor))
       f <- IO.pure(new Font("Helvetica Neue", Font.BOLD, hOffset / 3))
       _ <- IO.apply(g.setColor(new Color(187, 173, 160, 30)))
       _ <- IO.apply(g.fillRect(0, 0, config.boardWidth, config.boardHeight))
