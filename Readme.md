@@ -10,7 +10,7 @@ Simply run the project with
 
 You can also run the released binary
 ```
-  java -jar Pure2048-0.0.2.jar
+  java -jar Pure2048-0.0.3.jar
 ```
 
 Use the arrow keys to play. Have fun !
