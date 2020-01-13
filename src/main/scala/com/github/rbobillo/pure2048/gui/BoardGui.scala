@@ -3,6 +3,7 @@ package com.github.rbobillo.pure2048.gui
 import java.awt.{ Dimension, Font, Graphics2D }
 
 import cats.effect.IO
+import cats.implicits._
 import com.github.rbobillo.pure2048.Config.config
 import com.github.rbobillo.pure2048.board.Merging.IndexedTiles
 import com.github.rbobillo.pure2048.board.{ Grid, Tile }
@@ -33,32 +34,17 @@ object BoardGui {
       _ <- IO.apply(g.fillRoundRect(xx + spacing, yy + spacing, wOffset - spacing, hOffset - spacing, 15, 15))
     } yield ()
 
-  private def drawPopingTile(g: Graphics2D)(t: Tile, x: Int, y: Int, prev: IndexedTiles): IO[Unit] = ???
-  private def drawMergingTile(g: Graphics2D)(t: Tile, x: Int, y: Int, prev: IndexedTiles): IO[Unit] = ???
-  private def drawMovingTile(g: Graphics2D)(t: Tile, x: Int, y: Int, prev: IndexedTiles): IO[Unit] = ???
-  private def drawBasicTile(g: Graphics2D)(t: Tile, x: Int, y: Int, prev: IndexedTiles): IO[Unit] = ???
-
-  private def animateTile(g: Graphics2D, p: BoardPanel)(t: Tile, x: Int, y: Int, prev: IndexedTiles): IO[Unit] =
-    for {
-      _ <- IO.unit
-      //o <- IO.pure(prev.find(_._1.id == t.id).getOrElse(t, x, y))
-      //_ <- IO.apply(println(o))
-      //_ <- IO.apply(g.clipRect(o._2, o._3, wOffset, hOffset))
-      //_ <- GuiUtils.slide(p, new Point(x, y))
-    } yield ()
-
   private def drawTile(g: Graphics2D, p: BoardPanel)(t: Tile, x: Int, y: Int, prev: IndexedTiles): IO[Unit] =
     for {
-      _ <- animateTile(g, p)(t, x, y, prev)
       _ <- drawTileBackGround(g)(t.v, x, y)
       _ <- drawTileText(g)(t.v, x, y)
     } yield ()
 
   def drawIndexedTiles(g: Graphics2D, boardPanel: BoardPanel)(grid: Grid): IO[Unit] =
     for {
-      its <- IO.pure(grid.indexedTiles)
+      ts <- IO.pure(grid.indexedTiles.toList)
       _ <- IO.apply(boardPanel.frame.setBackground(config.boardBackgroundColor))
-      _ <- IO.apply(its.map { case (t, x, y) => drawTile(g, boardPanel)(t, x, y, grid.indexedPrev).unsafeRunSync() })
+      _ <- ts.traverse { case (t, x, y) => drawTile(g, boardPanel)(t, x, y, grid.indexedPrev) }
     } yield ()
 
   private def createFrameAndPanel(width: Int, height: Int): IO[BoardPanel] =
